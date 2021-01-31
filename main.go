@@ -1,15 +1,15 @@
 package main
 
 import (
+	"bufio"
 	"crypto/tls"
 	"flag"
 	"fmt"
+	"github.com/steelx/extractlinks"
 	"net/http"
 	"net/url"
 	"os"
-
-	"github.com/steelx/extractlinks"
-
+	"strings"
 )
 
 //Making my own Client so I can ignore SSL certificates
@@ -18,6 +18,7 @@ var transport = &http.Transport{TLSClientConfig: config}
 var customWebclient = &http.Client{Transport: transport}
 var urlCrawlQueue = make(chan string)
 var crawlerVisited = make(map[string]bool)
+var getParameterScanned = make(map[string]bool)
 var bruteforceGetParametersQueue = make(chan string)
 
 func main() {
@@ -50,7 +51,7 @@ func main() {
 		go func(){
 			for href := range urlCrawlQueue{
 				if !crawlerVisited[href] && sameDomainCheck(href, baseurl)  {
-					crawlUrl(href)
+					crawlUrlLinks(href)
 				}
 			}
 		}()
@@ -63,7 +64,35 @@ func main() {
 
 		//Keep Crawling URLS
 		for bruteforceHref := range bruteforceGetParametersQueue{
-			fmt.Println("Bruteforcing Get parameter: ", bruteforceHref)
+			guessParameterBruteforce(bruteforceHref)
+		}
+	}
+}
+
+
+////////////////////////////////////////////
+///// THIS BLOCK IS WHERE FUNCTIONS START///
+////////////////////////////////////////////
+
+//Bruteforcing for get parameters
+func guessParameterBruteforce(bruteforceHref string){
+
+	getParameterScanned[bruteforceHref] = true
+
+	fmt.Println("Starting GET Parameter Bruteforce for: ", bruteforceHref)
+	checkBodyFor("test",bruteforceHref)
+}
+
+
+func checkBodyFor(keyword string, url string) {
+	response, err := customWebclient.Get(url)
+	defer response.Body.Close()
+	checkErr(err)
+
+	scanner := bufio.NewScanner(response.Body)
+	for scanner.Scan() {
+		if strings.Contains(scanner.Text(), string(keyword)) == true {
+			fmt.Println(scanner.Text())
 		}
 	}
 }
@@ -102,12 +131,11 @@ func createFullUrl(href, baseURL string) string{
 	return fixedUri.String()
 }
 
-//Will crawl the URL
-func crawlUrl(href string){
+//Will crawl the URL for links
+func crawlUrlLinks(href string){
 	//Add url to visited map
 	crawlerVisited[href] = true
 
-	fmt.Println("THIS URL ADDED TO BRUTEFORCE GET PARAMETER QUEUE: ", href)
 	go func () {
 		bruteforceGetParametersQueue <- href
 	}()
