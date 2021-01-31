@@ -118,11 +118,11 @@ func guessParameterBruteforce(bruteforceHref string){
 		}
 		fmt.Println("Checking Get Parameter", getParameterurl+hash)
 
-		if checkBodyFor(hash,getParameterurl) == true{
+		if checkBodyFor(hash,getParameterurl+hash) == true{
 			fmt.Println("++ Potenial Get Parameter found! ", getParameterurl+hash)
-			go func () {
+			go func (xssHref string) {
 				xssScannerQueue <- getParameterurl
-			}()
+			}(getParameterurl)
 		}
 
 		mu.Unlock()
