@@ -79,11 +79,10 @@ func main() {
 			}
 		}()
 
-		go func(){
 			for xssHref := range xssScannerQueue{
-				fmt.Println("XSS Scanning ", xssHref)
+				xssScanner(xssHref)
 			}
-		}()
+
 	}
 }
 
@@ -91,6 +90,11 @@ func main() {
 ////////////////////////////////////////////
 ///// THIS BLOCK IS WHERE FUNCTIONS START///
 ////////////////////////////////////////////
+
+func xssScanner(xsshref string){
+	fmt.Println("Starting XSS Scan on ", xsshref)
+
+}
 
 //Bruteforcing for get parameters
 func guessParameterBruteforce(bruteforceHref string){
