@@ -93,6 +93,18 @@ func main() {
 
 func xssScanner(xsshref string){
 	fmt.Println("Starting XSS Scan on ", xsshref)
+	xssPayloadFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\go-xss\xsspayloads.txt`)
+	checkErr(err)
+	defer xssPayloadFile.Close()
+
+	scanner := bufio.NewScanner(xssPayloadFile)
+	for scanner.Scan() {
+		xsspayload := scanner.Text()
+		if checkBodyFor(xsspayload,xsshref+xsspayload) == true{
+			fmt.Println("++++ [XSS FOUND] ++++ ", xsshref+xsspayload)
+		}
+
+	}
 
 }
 
@@ -127,7 +139,7 @@ func guessParameterBruteforce(bruteforceHref string){
 
 		if checkBodyFor(hash,getParameterurl+hash) == true{
 			go func () {
-				fmt.Println("++++ Potenial Get Parameter found! ", getParameterurl)
+				fmt.Println("++ Potenial Get Parameter found! ", getParameterurl)
 				xssScannerQueue <- getParameterurl
 			}()
 		}
