@@ -6,25 +6,41 @@ import (
 	"flag"
 	"fmt"
 	"github.com/steelx/extractlinks"
+	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
+	"strconv"
 	"strings"
+	"sync"
+	"time"
 )
 
 //Making my own Client so I can ignore SSL certificates
 var config = &tls.Config{InsecureSkipVerify: true,}
 var transport = &http.Transport{TLSClientConfig: config}
 var customWebclient = &http.Client{Transport: transport}
+
 var urlCrawlQueue = make(chan string)
 var crawlerVisited = make(map[string]bool)
+
 var getParameterScanned = make(map[string]bool)
 var bruteforceGetParametersQueue = make(chan string)
+
+var xssScannerQueue = make(chan string)
+
+
+
+var mu sync.Mutex
+var hash string
 
 func main() {
 	targetUrl := flag.String("url", "", "Target URL. (Required)")
 	RecursiveBool := flag.Bool("recursion", false, "Scan urls recursively.")
 	flag.Parse()
+
+	//generate random hash
+	rand.Seed(time.Now().UnixNano())
 
 	//Check if the URL is provided
 	if *targetUrl == "" {
@@ -77,14 +93,43 @@ func main() {
 //Bruteforcing for get parameters
 func guessParameterBruteforce(bruteforceHref string){
 
+	fmt.Println("Starting GET Parameter Bruteforce for: ", bruteforceHref)
+	//Marking URL as scanned
 	getParameterScanned[bruteforceHref] = true
 
-	fmt.Println("Starting GET Parameter Bruteforce for: ", bruteforceHref)
-	checkBodyFor("test",bruteforceHref)
+	//Getting the parameter file
+	getParameterFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\go-xss\getparameters.txt`)
+	checkErr(err)
+	defer getParameterFile.Close()
+
+	//Generate Hash
+	hash := "goxss-" + strconv.Itoa(rand.Int())
+
+	scanner := bufio.NewScanner(getParameterFile)
+	for scanner.Scan() {
+		mu.Lock()
+
+		if strings.Contains(bruteforceHref, string("?")) == true {
+			fmt.Println("Checking Get Parameter", bruteforceHref+"&"+scanner.Text()+"="+hash)
+			if checkBodyFor(hash,bruteforceHref+"&"+scanner.Text()+"="+hash) == true{
+				fmt.Println("++ Potenial Get Parameter found! ", bruteforceHref+"&"+scanner.Text()+"="+hash)
+
+			}
+
+		} else {
+			fmt.Println("Checking Get Parameter", bruteforceHref+"?"+scanner.Text()+"="+hash)
+			if checkBodyFor(hash,bruteforceHref+"?"+scanner.Text()+"="+hash) == true{
+				fmt.Println("++ Potenial Get Parameter found!", bruteforceHref+"?"+scanner.Text()+"="+hash)
+			}
+		}
+
+		mu.Unlock()
+
+	}
 }
 
 
-func checkBodyFor(keyword string, url string) {
+func checkBodyFor(keyword string, url string) bool {
 	response, err := customWebclient.Get(url)
 	defer response.Body.Close()
 	checkErr(err)
@@ -93,9 +138,12 @@ func checkBodyFor(keyword string, url string) {
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), string(keyword)) == true {
 			fmt.Println(scanner.Text())
+			return true
 		}
 	}
+	return false
 }
+
 
 //Check if the URL is also in Scope
 func sameDomainCheck(href, baseURL string) bool{
