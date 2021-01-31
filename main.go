@@ -28,6 +28,7 @@ var getParameterScanned = make(map[string]bool)
 var bruteforceGetParametersQueue = make(chan string)
 
 var xssScannerQueue = make(chan string)
+var xsshits = make(map[string]bool)
 
 
 
@@ -99,9 +100,14 @@ func xssScanner(xsshref string){
 
 	scanner := bufio.NewScanner(xssPayloadFile)
 	for scanner.Scan() {
-		xsspayload := scanner.Text()
-		if checkBodyFor(xsspayload,xsshref+xsspayload) == true{
-			fmt.Println("++++ [XSS FOUND] ++++ ", xsshref+xsspayload)
+		if !xsshits[xsshref]{
+			xsspayload := scanner.Text()
+			if checkBodyFor(xsspayload,xsshref+xsspayload) == true{
+				fmt.Println("++++ [XSS FOUND] ++++ ", xsshref+xsspayload)
+				xsshits[xsshref] = true
+			}
+		}else{
+			fmt.Println("Skipping Url already exploited: ", xsshref)
 		}
 
 	}
