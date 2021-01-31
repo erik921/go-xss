@@ -92,7 +92,7 @@ func main() {
 ////////////////////////////////////////////
 
 func xssScanner(xsshref string){
-	fmt.Println("Starting XSS Scan on ", xsshref)
+	//fmt.Println("Starting XSS Scan on ", xsshref)
 	xssPayloadFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\go-xss\xsspayloads.txt`)
 	checkErr(err)
 	defer xssPayloadFile.Close()
@@ -111,7 +111,7 @@ func xssScanner(xsshref string){
 //Bruteforcing for get parameters
 func guessParameterBruteforce(bruteforceHref string){
 
-	fmt.Println("Starting GET Parameter Bruteforce for: ", bruteforceHref)
+	//fmt.Println("Starting GET Parameter Bruteforce for: ", bruteforceHref)
 	//Marking URL as scanned
 	getParameterScanned[bruteforceHref] = true
 
@@ -135,7 +135,7 @@ func guessParameterBruteforce(bruteforceHref string){
 			getParameterurl = bruteforceHref+"?"+scanner.Text()+"="
 
 		}
-		fmt.Println("Checking Get Parameter", getParameterurl+hash)
+		//fmt.Println("Checking Get Parameter", getParameterurl+hash)
 
 		if checkBodyFor(hash,getParameterurl+hash) == true{
 			go func () {
@@ -156,7 +156,7 @@ func checkBodyFor(keyword string, url string) bool {
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), string(keyword)) == true {
-			fmt.Println(scanner.Text())
+			fmt.Println("Keyword reflected: ",scanner.Text())
 			return true
 		}
 	}
@@ -208,7 +208,7 @@ func crawlUrlLinks(href string){
 	}()
 
 	//Makes a webrequest to the TargetURL
-	fmt.Println("Started Crawling: ", href)
+	//fmt.Println("Started Crawling: ", href)
 	response, err := customWebclient.Get(href)
 	defer response.Body.Close()
 	checkErr(err)
