@@ -72,16 +72,15 @@ func main() {
 			}
 		}()
 
-		//Queue for Bruteforce get parameters
-		go func () {
-			bruteforceGetParametersQueue <- baseurl
-
-		}()
-
 		//Keep Crawling URLS
 		for bruteforceHref := range bruteforceGetParametersQueue{
 			guessParameterBruteforce(bruteforceHref)
 		}
+
+		for xssHref := range xssScannerQueue{
+			fmt.Println("XSS Scanning ", xssHref)
+		}
+
 	}
 }
 
@@ -108,19 +107,22 @@ func guessParameterBruteforce(bruteforceHref string){
 	scanner := bufio.NewScanner(getParameterFile)
 	for scanner.Scan() {
 		mu.Lock()
+		getParameterurl := ""
 
 		if strings.Contains(bruteforceHref, string("?")) == true {
-			fmt.Println("Checking Get Parameter", bruteforceHref+"&"+scanner.Text()+"="+hash)
-			if checkBodyFor(hash,bruteforceHref+"&"+scanner.Text()+"="+hash) == true{
-				fmt.Println("++ Potenial Get Parameter found! ", bruteforceHref+"&"+scanner.Text()+"="+hash)
+			getParameterurl = bruteforceHref+"&"+scanner.Text()+"="
 
-			}
+			}else {
+			getParameterurl = bruteforceHref+"?"+scanner.Text()+"="
 
-		} else {
-			fmt.Println("Checking Get Parameter", bruteforceHref+"?"+scanner.Text()+"="+hash)
-			if checkBodyFor(hash,bruteforceHref+"?"+scanner.Text()+"="+hash) == true{
-				fmt.Println("++ Potenial Get Parameter found!", bruteforceHref+"?"+scanner.Text()+"="+hash)
-			}
+		}
+		fmt.Println("Checking Get Parameter", getParameterurl+hash)
+
+		if checkBodyFor(hash,getParameterurl) == true{
+			fmt.Println("++ Potenial Get Parameter found! ", getParameterurl+hash)
+			go func () {
+				xssScannerQueue <- getParameterurl
+			}()
 		}
 
 		mu.Unlock()
