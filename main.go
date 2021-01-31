@@ -72,15 +72,18 @@ func main() {
 			}
 		}()
 
-		//Keep Crawling URLS
-		for bruteforceHref := range bruteforceGetParametersQueue{
-			guessParameterBruteforce(bruteforceHref)
-		}
 
-		for xssHref := range xssScannerQueue{
-			fmt.Println("XSS Scanning ", xssHref)
-		}
+		go func(){
+			for bruteforceHref := range bruteforceGetParametersQueue{
+				guessParameterBruteforce(bruteforceHref)
+			}
+		}()
 
+		go func(){
+			for xssHref := range xssScannerQueue{
+				fmt.Println("XSS Scanning ", xssHref)
+			}
+		}()
 	}
 }
 
@@ -119,14 +122,12 @@ func guessParameterBruteforce(bruteforceHref string){
 		fmt.Println("Checking Get Parameter", getParameterurl+hash)
 
 		if checkBodyFor(hash,getParameterurl+hash) == true{
-			fmt.Println("++ Potenial Get Parameter found! ", getParameterurl+hash)
-			go func (xssHref string) {
+			go func () {
+				fmt.Println("++++ Potenial Get Parameter found! ", getParameterurl)
 				xssScannerQueue <- getParameterurl
-			}(getParameterurl)
+			}()
 		}
-
 		mu.Unlock()
-
 	}
 }
 
