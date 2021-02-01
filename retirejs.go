@@ -37,8 +37,11 @@ func checkDomainAvailable(domainname string){
 
 func ScanSignature(url string) () {
 
-	jqueryRegexCheck, _ := regexp.MatchString(`jquery-[0-3].[0-5].[0]`,url)
-	if jqueryRegexCheck == true{
+	jqueryRegexCheck, _ := regexp.MatchString(`jquery-[0-3].[0-5]`,url)
+	jqueryRegexCheck2, _ := regexp.MatchString(`jquery-3.5.1`,url)
+
+
+	if jqueryRegexCheck == true && jqueryRegexCheck2 == false{
 		fmt.Println("[++] Jquery is outdated!: ", url)
 	}
 
