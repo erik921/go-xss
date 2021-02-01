@@ -12,7 +12,6 @@ import (
 	"net/http"
 	"net/url"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -20,7 +19,7 @@ import (
 )
 
 //Making my own Client so I can ignore SSL certificates
-var config = &tls.Config{InsecureSkipVerify: true,}
+var config = &tls.Config{InsecureSkipVerify: true}
 var transport = &http.Transport{TLSClientConfig: config}
 var customWebclient = &http.Client{Transport: transport}
 
@@ -97,7 +96,7 @@ func main() {
 
 func xssScanner(xsshref string){
 	//fmt.Println("Starting XSS Scan on ", xsshref)
-	xssPayloadFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\go-xss\xsspayloads.txt`)
+	xssPayloadFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\goxss\xsspayloads.txt`)
 	checkErr(err)
 	defer xssPayloadFile.Close()
 
@@ -125,7 +124,7 @@ func guessParameterBruteforce(bruteforceHref string){
 	getParameterScanned[bruteforceHref] = true
 
 	//Getting the parameter file
-	getParameterFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\go-xss\getparameters.txt`)
+	getParameterFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\goxss\getparameters.txt`)
 	checkErr(err)
 	defer getParameterFile.Close()
 
@@ -228,8 +227,8 @@ func crawlUrlLinks(href string){
 	}
 	defer resp.Body.Close()
 
-
 	htmlData, _ := ioutil.ReadAll(resp.Body)
+
 	getSrcLinks(htmlData)
 
 	//Will get the links from the Body of the webrequest
@@ -240,15 +239,6 @@ func crawlUrlLinks(href string){
 		go func (url string) {
 			urlCrawlQueue <- wholeUrl
 		}(wholeUrl)
-	}
-}
-
-func getSrcLinks(htmlData []byte){
-	scriptExp := regexp.MustCompile(`<script[^>]+`)
-	scriptMatchSlice := scriptExp.FindAllStringSubmatch(string(htmlData), -1)
-
-	for _, item := range scriptMatchSlice {
-		fmt.Println("Script SRC found : ", item)
 	}
 }
 
