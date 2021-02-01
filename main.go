@@ -229,7 +229,7 @@ func crawlUrlLinks(href string){
 
 	htmlData, _ := ioutil.ReadAll(resp.Body)
 
-	getSrcLinks(htmlData)
+	getSrcLinks(htmlData,href)
 
 	//Will get the links from the Body of the webrequest
 	links, _ := extractlinks.All(response.Body)
