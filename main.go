@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"github.com/steelx/extractlinks"
 	"io/ioutil"
+	"log"
 	"math/rand"
 	"net/http"
 	"net/url"
@@ -158,9 +159,9 @@ func guessParameterBruteforce(bruteforceHref string){
 
 func checkBodyFor(keyword string, url string) bool {
 	response, err := customWebclient.Get(url)
-	defer response.Body.Close()
 	checkErr(err)
 
+	defer response.Body.Close()
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), string(keyword)) == true {
@@ -218,21 +219,21 @@ func crawlUrlLinks(href string){
 	//Makes a webrequest to the TargetURL
 	//fmt.Println("Started Crawling: ", href)
 	response, err := customWebclient.Get(href)
-	defer response.Body.Close()
 	checkErr(err)
+	defer response.Body.Close()
 
-	htmlData, _ := ioutil.ReadAll(response.Body)
+	resp, err := http.Get(href)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer resp.Body.Close()
+
+
+	htmlData, _ := ioutil.ReadAll(resp.Body)
+	getSrcLinks(htmlData)
 
 	//Will get the links from the Body of the webrequest
 	links, _ := extractlinks.All(response.Body)
-
-	//Scan the body for script src links
-	scriptExp := regexp.MustCompile(`<script[^>]+`)
-	scriptMatchSlice := scriptExp.FindAllStringSubmatch(string(htmlData), -1)
-
-	for _, item := range scriptMatchSlice {
-		fmt.Println("Script SRC found : ", item)
-	}
 
 	for _, link := range links{
 		wholeUrl := createFullUrl(link.Href, href)
@@ -242,10 +243,20 @@ func crawlUrlLinks(href string){
 	}
 }
 
+func getSrcLinks(htmlData []byte){
+	scriptExp := regexp.MustCompile(`<script[^>]+`)
+	scriptMatchSlice := scriptExp.FindAllStringSubmatch(string(htmlData), -1)
+
+	for _, item := range scriptMatchSlice {
+		fmt.Println("Script SRC found : ", item)
+	}
+}
+
 //Function to catch the errors and process them.
 //Will also exit program in case of error
 func checkErr(err error){
 	if err != nil {
+		fmt.Println("==Error==")
 		fmt.Println(err)
 		os.Exit(1)
 	}
