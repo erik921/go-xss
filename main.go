@@ -6,10 +6,12 @@ import (
 	"flag"
 	"fmt"
 	"github.com/steelx/extractlinks"
+	"io/ioutil"
 	"math/rand"
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -219,8 +221,18 @@ func crawlUrlLinks(href string){
 	defer response.Body.Close()
 	checkErr(err)
 
-	//Will get the Body of the previous webrequest
+	htmlData, _ := ioutil.ReadAll(response.Body)
+
+	//Will get the links from the Body of the webrequest
 	links, _ := extractlinks.All(response.Body)
+
+	//Scan the body for script src links
+	scriptExp := regexp.MustCompile(`<script[^>]+`)
+	scriptMatchSlice := scriptExp.FindAllStringSubmatch(string(htmlData), -1)
+
+	for _, item := range scriptMatchSlice {
+		fmt.Println("Script SRC found : ", item)
+	}
 
 	for _, link := range links{
 		wholeUrl := createFullUrl(link.Href, href)
