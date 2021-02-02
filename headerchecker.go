@@ -28,14 +28,32 @@ func getHeaders(url string) map[string]interface {}{
 //fuction to check header with a string
 //Returns the string of the header.
 //If the header is not in the map it will return an empty string.
-func getURLHeaderByKey(url string) string {
+func getURLHeaderByKey(url string){
 	headers := getHeaders(url)
 
-	key := "Content-Type"
+	xssheader := "X-XSS-Protection"
+	xframeheader := "X-Frame-Options"
+	contentheader := "X-Content-Type-Options"
+	cspheader := "Content-Security-Policy"
 
-	if value, ok := headers[key]; ok {
-		return value.(string)
+	//Checks the xssheader
+	if value, ok := headers[xssheader]; ok {
+		fmt.Println(value.(string))
 	}
 
-	return ""
+	//Checks the xframe header
+	if value, ok := headers[xframeheader]; ok {
+		fmt.Println(value.(string))
+	}
+
+	//checks the content type header
+	if value, ok := headers[contentheader]; ok {
+		fmt.Println(value.(string))
+	}
+
+	//checks the csp header
+	if value, ok := headers[cspheader]; ok {
+		fmt.Println(value.(string))
+	}
+
 }
