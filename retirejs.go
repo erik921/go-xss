@@ -20,19 +20,21 @@ func getSrcLinks(htmlData []byte, baseurl string){
 			checkDomainAvailable(item[1])
 		}else{
 			fmt.Println("Script SRC found : ", baseurl+item[1])
-			checkDomainAvailable(baseurl+item[1])
+			if checkDomainAvailable(baseurl+item[1]) == true{
+				fmt.Println("[+] SRC Domain not registed!")
+			}
 			ScanSignature(baseurl+item[1])
 		}
 	}
 }
 
-func checkDomainAvailable(domainname string){
+func checkDomainAvailable(domainname string)bool{
 	available := available.Domain(domainname)
 	if available {
 		fmt.Println("[+] Domain not registed!")
-	}else{
-		fmt.Println("Domain is registed")
+		return true
 	}
+	return false
 }
 
 func ScanSignature(url string) () {
