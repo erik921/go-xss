@@ -53,9 +53,13 @@ func main() {
 		os.Exit(1)
 	}
 
+
 	//Program continues with this if url is set
 	baseurl := *targetUrl
 	fmt.Println("Starting go-xss on domain:", baseurl)
+
+	getURLHeaderByKey(baseurl)
+
 
 	if *RecursiveBool == true {
 		fmt.Println("Searching recursively")
@@ -214,7 +218,6 @@ func crawlUrlLinks(href string){
 	go func () {
 		bruteforceGetParametersQueue <- href
 	}()
-
 	//Check if the link might be going to unregisted domain, Potential Phising!
 	if checkDomainAvailable(href) == true{
 		fmt.Println("[+] Domain not registed!: ", href)
