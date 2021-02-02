@@ -60,15 +60,14 @@ func main() {
 
 	getURLHeaderByKey(baseurl)
 
+	//Add Base URL to queue
+	go func () {
+		urlCrawlQueue <- baseurl
+
+	}()
 
 	if *RecursiveBool == true {
 		fmt.Println("Searching recursively")
-
-		//Queue for Crawling
-		go func () {
-			urlCrawlQueue <- baseurl
-
-		}()
 
 		//Keep Crawling URLS
 		go func(){
@@ -79,18 +78,23 @@ func main() {
 			}
 		}()
 
-
-		go func(){
-			for bruteforceHref := range bruteforceGetParametersQueue{
-				guessParameterBruteforce(bruteforceHref)
-			}
-		}()
-
-			for xssHref := range xssScannerQueue{
-				xssScanner(xssHref)
-			}
-
+	}else{
+		href := <-urlCrawlQueue
+		if !crawlerVisited[href] && sameDomainCheck(href, baseurl)  {
+			crawlUrlLinks(href)
+		}
 	}
+
+	go func(){
+		for bruteforceHref := range bruteforceGetParametersQueue{
+			guessParameterBruteforce(bruteforceHref)
+		}
+	}()
+
+	for xssHref := range xssScannerQueue{
+		xssScanner(xssHref)
+	}
+
 }
 
 
@@ -218,6 +222,8 @@ func crawlUrlLinks(href string){
 	go func () {
 		bruteforceGetParametersQueue <- href
 	}()
+
+
 	//Check if the link might be going to unregisted domain, Potential Phising!
 	if checkDomainAvailable(href) == true{
 		fmt.Println("[+] Domain not registed!: ", href)
@@ -241,6 +247,7 @@ func crawlUrlLinks(href string){
 
 	//Will get the links from the Body of the webrequest
 	links, _ := extractlinks.All(response.Body)
+
 
 	for _, link := range links{
 		wholeUrl := createFullUrl(link.Href, href)
