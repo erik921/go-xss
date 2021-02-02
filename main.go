@@ -215,6 +215,11 @@ func crawlUrlLinks(href string){
 		bruteforceGetParametersQueue <- href
 	}()
 
+	//Check if the link might be going to unregisted domain, Potential Phising!
+	if checkDomainAvailable(href) == true{
+		fmt.Println("[+] Domain not registed!: ", href)
+	}
+
 	//Makes a webrequest to the TargetURL
 	//fmt.Println("Started Crawling: ", href)
 	response, err := customWebclient.Get(href)
