@@ -119,6 +119,17 @@ func xssAnalysis(xsshref string){
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), string(hash)) == true {
+
+			//Check if payload is being placed inside of a link tag
+			if strings.Contains(scanner.Text(), "a href=") == true{
+				fmt.Println("Payload displayed inside of link tag!")
+			}
+
+			//Check if payload is being placed after = inside of html
+			if strings.Contains(scanner.Text(), "=goxss") == true{
+				fmt.Println("Payload being placed inside of attribute!")
+			}
+
 			fmt.Println("Keyword reflected: ",scanner.Text())
 		}
 	}
