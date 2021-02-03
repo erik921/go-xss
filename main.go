@@ -130,7 +130,11 @@ func xssAnalysis(xsshref string){
 				fmt.Println("Payload being placed inside of attribute!")
 			}
 
-			fmt.Println("Keyword reflected: ",scanner.Text())
+			fmt.Println("=====================================================================")
+			fmt.Println("Keyword reflected", xsshref)
+			fmt.Println(scanner.Text())
+			fmt.Println("=====================================================================")
+
 		}
 	}
 
