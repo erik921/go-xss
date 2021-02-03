@@ -58,7 +58,11 @@ func main() {
 	baseurl := *targetUrl
 	fmt.Println("Starting go-xss on domain:", baseurl)
 
+	//Get headers and analyse them
 	getURLHeaderByKey(baseurl)
+
+	//Get Cookies and analyse them
+	getCookies(baseurl)
 
 	//Add Base URL to queue
 	go func () {
