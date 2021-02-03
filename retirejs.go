@@ -14,7 +14,7 @@ func getSrcLinks(htmlData []byte, baseurl string){
 
 	for _, item := range scriptMatchSlice {
 		if strings.Contains(item[1], string("http")) == true{
-			fmt.Println("Script SRC found : ", item[1])
+			logPrint("Script SRC found : ", item[1])
 			ScanSignature(item[1])
 
 			checkDomainAvailable(item[1])
