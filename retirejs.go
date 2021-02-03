@@ -19,7 +19,7 @@ func getSrcLinks(htmlData []byte, baseurl string){
 
 			checkDomainAvailable(item[1])
 		}else{
-			fmt.Println("Script SRC found : ", baseurl+item[1])
+			logPrint("Script SRC found : ", baseurl+item[1])
 			if checkDomainAvailable(baseurl+item[1]) == true{
 				fmt.Println("[+] SRC Domain not registed!", baseurl+item[1])
 			}
