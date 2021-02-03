@@ -66,24 +66,24 @@ func main() {
 
 	}()
 
-	if *RecursiveBool == true {
-		fmt.Println("Searching recursively")
+	go func(){
+		if *RecursiveBool == true {
+			fmt.Println("Searching recursively")
 
-		//Keep Crawling URLS
-		go func(){
-			for href := range urlCrawlQueue{
-				if !crawlerVisited[href] && sameDomainCheck(href, baseurl)  {
-					crawlUrlLinks(href)
+			//Keep Crawling URLS
+			go func(){
+				for href := range urlCrawlQueue{
+					if !crawlerVisited[href] && sameDomainCheck(href, baseurl)  {
+						crawlUrlLinks(href)
+					}
 				}
-			}
-		}()
+			}()
 
-	}else{
-		href := <-urlCrawlQueue
-		if !crawlerVisited[href] && sameDomainCheck(href, baseurl)  {
+		}else{
+			href := <-urlCrawlQueue
 			crawlUrlLinks(href)
 		}
-	}
+	}()
 
 	go func(){
 		for bruteforceHref := range bruteforceGetParametersQueue{
