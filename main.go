@@ -109,6 +109,22 @@ func main() {
 ///// THIS BLOCK IS WHERE FUNCTIONS START///
 ////////////////////////////////////////////
 
+func xssAnalysis(xsshref string){
+	hash := "goxss-" + strconv.Itoa(rand.Int())
+
+	response, err := customWebclient.Get(xsshref+hash)
+	checkErr(err)
+	defer response.Body.Close()
+
+	scanner := bufio.NewScanner(response.Body)
+	for scanner.Scan() {
+		if strings.Contains(scanner.Text(), string(hash)) == true {
+			fmt.Println("Keyword reflected: ",scanner.Text())
+		}
+	}
+
+}
+
 func xssScanner(xsshref string){
 
 	//If verbose is set show starting xss on which domain
@@ -118,12 +134,17 @@ func xssScanner(xsshref string){
 	checkErr(err)
 	defer xssPayloadFile.Close()
 
+
+	//Analyis of parameter
+	xssAnalysis(xsshref)
+
+	//Start bruteforcing payloads as last resort
 	scanner := bufio.NewScanner(xssPayloadFile)
 	for scanner.Scan() {
 		if !xsshits[xsshref]{
 			xsspayload := scanner.Text()
 			if checkBodyFor(xsspayload,xsshref+xsspayload) == true{
-				fmt.Println("++++ [XSS FOUND] ++++ ", xsshref+xsspayload)
+				fmt.Println("++++ [XSS FOUND with payload bruteforcer] ++++ ", xsshref+xsspayload)
 				xsshits[xsshref] = true
 			}
 		}else{
