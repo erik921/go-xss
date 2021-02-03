@@ -32,7 +32,7 @@ var bruteforceGetParametersQueue = make(chan string)
 var xssScannerQueue = make(chan string)
 var xsshits = make(map[string]bool)
 
-
+var verboseBool *bool
 
 var mu sync.Mutex
 var hash string
@@ -40,6 +40,9 @@ var hash string
 func main() {
 	targetUrl := flag.String("url", "", "Target URL. (Required)")
 	RecursiveBool := flag.Bool("recursion", false, "Scan urls recursively.")
+	verboseBool = flag.Bool("verbose", false, "Scan urls recursively.")
+
+
 	flag.Parse()
 
 	//generate random hash
@@ -107,7 +110,10 @@ func main() {
 ////////////////////////////////////////////
 
 func xssScanner(xsshref string){
-	//fmt.Println("Starting XSS Scan on ", xsshref)
+
+	//If verbose is set show starting xss on which domain
+	logPrint("Starting XSS Scan on ", xsshref)
+
 	xssPayloadFile, err := os.Open(`C:\Users\Erik\Desktop\Go Projects\udemy-learn-go\goxss\xsspayloads.txt`)
 	checkErr(err)
 	defer xssPayloadFile.Close()
@@ -121,8 +127,8 @@ func xssScanner(xsshref string){
 				xsshits[xsshref] = true
 			}
 		}else{
-			fmt.Println("Skipping Url already exploited: ", xsshref)
-		}
+			logPrint("Skipping Url already exploited: ", xsshref)
+			}
 
 	}
 
@@ -131,7 +137,9 @@ func xssScanner(xsshref string){
 //Bruteforcing for get parameters
 func guessParameterBruteforce(bruteforceHref string){
 
-	//fmt.Println("Starting GET Parameter Bruteforce for: ", bruteforceHref)
+	//If verbose is set it will output which domain is getting bruteforced for GET parameter
+	logPrint("Starting GET Parameter Bruteforce for: ", bruteforceHref)
+
 	//Marking URL as scanned
 	getParameterScanned[bruteforceHref] = true
 
@@ -155,11 +163,14 @@ func guessParameterBruteforce(bruteforceHref string){
 			getParameterurl = bruteforceHref+"?"+scanner.Text()+"="
 
 		}
-		//fmt.Println("Checking Get Parameter", getParameterurl+hash)
+
+		//if verbose is set show which get parameter is getting checked
+		logPrint("Checking Get Parameter", getParameterurl+hash)
+
 
 		if checkBodyFor(hash,getParameterurl+hash) == true{
 			go func () {
-				fmt.Println("++ Potenial Get Parameter found! ", getParameterurl)
+				fmt.Println("[+] Potenial Get Parameter found! ", getParameterurl)
 				xssScannerQueue <- getParameterurl
 			}()
 		}
@@ -176,7 +187,7 @@ func checkBodyFor(keyword string, url string) bool {
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
 		if strings.Contains(scanner.Text(), string(keyword)) == true {
-			fmt.Println("Keyword reflected: ",scanner.Text())
+			logPrint("Keyword reflected: ",scanner.Text())
 			return true
 		}
 	}
@@ -196,7 +207,7 @@ func sameDomainCheck(href, baseURL string) bool{
 	}
 
 	if uri.Host != parentUri.Host {
-		fmt.Printf("Skipping, %v not same domain\n", uri.Host)
+		logPrint("Skipping, %v not same domain\n", uri.Host)
 		return false
 	}
 
@@ -234,7 +245,7 @@ func crawlUrlLinks(href string){
 	}
 
 	//Makes a webrequest to the TargetURL
-	//fmt.Println("Started Crawling: ", href)
+	logPrint("Started Crawling: ", href)
 	response, err := customWebclient.Get(href)
 	checkErr(err)
 	defer response.Body.Close()
@@ -268,5 +279,11 @@ func checkErr(err error){
 		fmt.Println("==Error==")
 		fmt.Println(err)
 		os.Exit(1)
+	}
+}
+
+func logPrint(output, argument string){
+	if *verboseBool == true{
+		fmt.Println(output, argument)
 	}
 }
