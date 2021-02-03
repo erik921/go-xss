@@ -15,6 +15,14 @@ func getCookies(url string){
 
 	//Gaat door alle cookies heen en plaatst deze in een map
 	for _, cookie := range response.Cookies() {
-		fmt.Println("Found a cookie named:", cookie.Name)
+
+		if cookie.Secure == false{
+			fmt.Println("[+] Found a cookie without secure flag named:", cookie.Name)
+		}
+
+		if cookie.HttpOnly == false{
+			fmt.Println("[+] Found a cookie without httponly flag named:", cookie.Name)
+
+		}
 	}
 }
