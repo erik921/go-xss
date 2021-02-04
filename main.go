@@ -37,7 +37,7 @@ var xsshits = make(map[string]bool)
 var verboseBool *bool
 
 var mu sync.Mutex
-var hash string
+//var hash string
 
 var foundParameters []string
 
@@ -124,7 +124,7 @@ func xssAnalysis(xsshref string){
 
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), string(hash)) == true {
+		if strings.Contains(scanner.Text(), hash) == true {
 
 			//Check if payload is being placed inside of a link tag
 			if strings.Contains(scanner.Text(), "a href=") == true{
@@ -215,7 +215,7 @@ func guessParameterBruteforce(bruteforceHref string){
 		mu.Lock()
 		getParameterurl := ""
 
-		if strings.Contains(bruteforceHref, string("?")) == true {
+		if strings.Contains(bruteforceHref, "?") == true {
 			getParameterurl = bruteforceHref+"&"+scanner.Text()+"="
 
 			}else {
@@ -245,7 +245,7 @@ func checkBodyFor(keyword string, url string) bool {
 	defer response.Body.Close()
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), string(keyword)) == true {
+		if strings.Contains(scanner.Text(), keyword) == true {
 			logPrint("Keyword reflected: ",scanner.Text())
 			return true
 		}
@@ -305,9 +305,9 @@ func crawlUrlLinks(href string){
 	}()
 
 
-	//Check if the link might be going to unregisted domain, Potential Phising!
+	//Check if the link might be going to unregisted domain, Potential Phishing!
 	if checkDomainAvailable(href) == true{
-		fmt.Println("[+] Domain not registed!: ", href)
+		fmt.Println("[+] Domain not registered!: ", href)
 	}
 
 	//Makes a webrequest to the TargetURL
