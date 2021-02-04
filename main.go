@@ -38,6 +38,10 @@ var verboseBool *bool
 var mu sync.Mutex
 var hash string
 
+var foundParameters []string
+
+
+
 func main() {
 	targetUrl := flag.String("url", "", "Target URL. (Required)")
 	RecursiveBool := flag.Bool("recursion", false, "Scan urls recursively.")
@@ -67,6 +71,10 @@ func main() {
 
 	//Get Cookies and analyse them
 	getCookies(baseurl)
+
+	//test
+	foundParameters = domainsplitter(baseurl, foundParameters)
+	print(foundParameters[0])
 
 	//Add Base URL to queue
 	go func () {
@@ -310,7 +318,7 @@ func crawlUrlLinks(href string){
 }
 
 //This function allows to get the parameters from the request
-func domainsplitter(domain string, parameters []string){
+func domainsplitter(domain string, foundParameters []string) []string{
 	paramstart := strings.Split(domain, "?")[1]
 	params := strings.Split(paramstart, "&")
 	for _, param := range params {
@@ -331,9 +339,9 @@ func domainsplitter(domain string, parameters []string){
 		} else {
 			strPara = param
 		}
-		parameters = append(parameters, strPara)
+		foundParameters = append(foundParameters, strPara)
 	}
-	fmt.Println(parameters)
+	return foundParameters
 }
 
 
