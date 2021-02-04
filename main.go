@@ -361,6 +361,8 @@ func paramFinder(domain string, foundParameters []string) []string{
 					strung := string(bl)
 					strPara += strung
 					strPara += j[2:]
+					foundParameters = append(foundParameters, strPara)
+
 				}
 			}
 		} else {
@@ -371,7 +373,11 @@ func paramFinder(domain string, foundParameters []string) []string{
 			foundParameters = append(foundParameters, strPara)
 
 		}
-		foundParameters = append(foundParameters, strPara)
+
+		fmt.Println("FOUND PARAMETERS ", foundParameters)
+		foundParameters = append(foundParameters)
+		fmt.Println("FOUND PARAMETERS 2", foundParameters)
+
 	}
 	return foundParameters
 }
