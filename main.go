@@ -255,7 +255,7 @@ func sameDomainCheck(href, baseURL string) bool{
 	}
 
 	if uri.Host != parentUri.Host {
-		logPrint("Skipping, %v not same domain\n", uri.Host)
+		logPrint("Skipping, not same domain: ", uri.Host)
 		return false
 	}
 
@@ -312,7 +312,11 @@ func crawlUrlLinks(href string){
 
 	htmlData, _ := ioutil.ReadAll(resp.Body)
 
+	//scans SRC for outdated Jquery and if domain is still registered
 	getSrcLinks(htmlData,href)
+
+	//Checks all links if domain is still registered
+	checkLinkUrl(htmlData,href)
 
 	//Will get the links from the Body of the webrequest
 	links, _ := extractlinks.All(response.Body)
@@ -352,7 +356,7 @@ func paramFinder(domain string, foundParameters []string) []string{
 			//Regex to replace values from parameters
 			removeValueRegex := regexp.MustCompile("=.*$")
 			strPara := removeValueRegex.ReplaceAllString(param, "${1}")
-			fmt.Println("STR PARAM", strPara)
+			foundParameters = append(foundParameters, strPara)
 
 		}
 		foundParameters = append(foundParameters, strPara)
