@@ -8,6 +8,8 @@ import (
 )
 
 var getScriptFound = make(map[string]bool)
+var getLinkFound = make(map[string]bool)
+
 
 
 func getSrcLinks(htmlData []byte, baseurl string){
@@ -43,12 +45,46 @@ func getSrcLinks(htmlData []byte, baseurl string){
 	}
 }
 
+func checkLinkUrl(htmlData []byte, baseurl string){
+	hrefregex := regexp.MustCompile(`<a[^>]+\bhref=["']([^"']+)["']`)
+
+	scriptMatchSlice := hrefregex.FindAllStringSubmatch(string(htmlData), -1)
+
+	for _, item := range scriptMatchSlice {
+		if !getLinkFound[item[1]]{
+			if strings.Contains(item[1], string("http")) == true{
+				logPrint("HREF link found: ", item[1])
+				checkDomainAvailable(item[1])
+
+				//Add script to list of found src
+				getLinkFound[item[1]] = true
+
+			}else{
+				logPrint("HREF link found: ", baseurl+item[1])
+				//Add script to list of found src
+				getLinkFound[baseurl+item[1]] = true
+
+				if checkDomainAvailable(baseurl+item[1]) == true{
+					fmt.Println("[+] HREF Domain not registed!", baseurl+item[1])
+
+				}
+			}
+		}else{
+			logPrint("Href was already found", "")
+		}
+	}
+}
+
+
+
 func checkDomainAvailable(domainname string)bool{
 	available := available.Domain(domainname)
 	if available {
-		fmt.Println("[+] Domain not registed!")
+		//domain is nog registered returns true
 		return true
 	}
+	//domain registered returns false
+	logPrint("Checked domain but its registed", domainname)
 	return false
 }
 
