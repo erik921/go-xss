@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
-	"regexp"
 	"github.com/haccer/available"
+	"regexp"
 	"strings"
 )
+
+var getScriptFound = make(map[string]bool)
+
 
 func getSrcLinks(htmlData []byte, baseurl string){
 	scriptExp := regexp.MustCompile(`<script[^>]+\bsrc=["']([^"']+)["']`)
@@ -13,17 +16,29 @@ func getSrcLinks(htmlData []byte, baseurl string){
 	scriptMatchSlice := scriptExp.FindAllStringSubmatch(string(htmlData), -1)
 
 	for _, item := range scriptMatchSlice {
-		if strings.Contains(item[1], string("http")) == true{
-			logPrint("Script SRC found : ", item[1])
-			ScanSignature(item[1])
+		if !getScriptFound[item[1]]{
+			if strings.Contains(item[1], string("http")) == true{
+				logPrint("Script SRC found : ", item[1])
+				ScanSignature(item[1])
 
-			checkDomainAvailable(item[1])
-		}else{
-			logPrint("Script SRC found : ", baseurl+item[1])
-			if checkDomainAvailable(baseurl+item[1]) == true{
-				fmt.Println("[+] SRC Domain not registed!", baseurl+item[1])
+				checkDomainAvailable(item[1])
+
+				//Add script to list of found src
+				getScriptFound[item[1]] = true
+				
+			}else{
+				logPrint("Script SRC found : ", baseurl+item[1])
+				//Add script to list of found src
+				getScriptFound[baseurl+item[1]] = true
+
+				if checkDomainAvailable(baseurl+item[1]) == true{
+					fmt.Println("[+] SRC Domain not registed!", baseurl+item[1])
+
+				}
+				ScanSignature(baseurl+item[1])
 			}
-			ScanSignature(baseurl+item[1])
+		}else{
+			fmt.Println("SRC script already found")
 		}
 	}
 }
