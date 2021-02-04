@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"crypto/tls"
+	"encoding/hex"
 	"flag"
 	"fmt"
 	"github.com/steelx/extractlinks"
@@ -307,6 +308,38 @@ func crawlUrlLinks(href string){
 		}(wholeUrl)
 	}
 }
+
+//This function allows to get the parameters from the request
+func domainsplitter(domain string, parameters []string){
+	paramstart := strings.Split(domain, "?")[1]
+	params := strings.Split(paramstart, "&")
+	for _, param := range params {
+		percentSpl := strings.Split(param, "%")
+
+		var strPara string
+		if len(percentSpl) > 1 {
+			for i, j := range percentSpl {
+				if i == 0 {
+					strPara += j
+				} else {
+					bl, _ := hex.DecodeString(j[:2])
+					strung := string(bl)
+					strPara += strung
+					strPara += j[2:]
+				}
+			}
+		} else {
+			strPara = param
+		}
+		parameters = append(parameters, strPara)
+	}
+	fmt.Println(parameters)
+}
+
+
+/////////////////////////////////////
+////// Error and Log processing//////
+//////////////////////////////////////
 
 //Function to catch the errors and process them.
 //Will also exit program in case of error
