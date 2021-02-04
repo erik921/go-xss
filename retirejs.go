@@ -18,14 +18,14 @@ func getSrcLinks(htmlData []byte, baseurl string){
 	for _, item := range scriptMatchSlice {
 		if !getScriptFound[item[1]]{
 			if strings.Contains(item[1], string("http")) == true{
-				logPrint("Script SRC found : ", item[1])
+				fmt.Println("Script SRC found : ", item[1])
 				ScanSignature(item[1])
 
 				checkDomainAvailable(item[1])
 
 				//Add script to list of found src
 				getScriptFound[item[1]] = true
-				
+
 			}else{
 				logPrint("Script SRC found : ", baseurl+item[1])
 				//Add script to list of found src
@@ -38,7 +38,7 @@ func getSrcLinks(htmlData []byte, baseurl string){
 				ScanSignature(baseurl+item[1])
 			}
 		}else{
-			fmt.Println("SRC script already found")
+			logPrint("SRC script already found", "")
 		}
 	}
 }
