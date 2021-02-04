@@ -72,10 +72,6 @@ func main() {
 	//Get Cookies and analyse them
 	getCookies(baseurl)
 
-	//test
-	foundParameters = domainsplitter(baseurl, foundParameters)
-	print(foundParameters[0])
-
 	//Add Base URL to queue
 	go func () {
 		urlCrawlQueue <- baseurl
@@ -196,6 +192,12 @@ func guessParameterBruteforce(bruteforceHref string){
 	//Generate Hash
 	hash := "goxss-" + strconv.Itoa(rand.Int())
 
+	//Scan found parameters
+	for i, s := range foundParameters {
+		fmt.Println("Testing variable", i, s)
+	}
+
+		//Scan with Bruteforce
 	scanner := bufio.NewScanner(getParameterFile)
 	for scanner.Scan() {
 		mu.Lock()
@@ -276,8 +278,14 @@ func createFullUrl(href, baseURL string) string{
 
 //Will crawl the URL for links
 func crawlUrlLinks(href string){
+
 	//Add url to visited map
 	crawlerVisited[href] = true
+
+	if strings.Contains(href,"?"){
+		foundParameters = domainsplitter(href, foundParameters)
+	}
+
 
 	go func () {
 		bruteforceGetParametersQueue <- href
