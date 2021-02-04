@@ -194,8 +194,19 @@ func guessParameterBruteforce(bruteforceHref string){
 	hash := "goxss-" + strconv.Itoa(rand.Int())
 
 	//Scan found parameters
-	for i, s := range foundParameters {
-		fmt.Println("Testing variable", i, s)
+	for i, parameter := range foundParameters {
+		domainOnlyRegex := regexp.MustCompile("\\?.*$")
+		domainOnly := domainOnlyRegex.ReplaceAllString(bruteforceHref, "")
+		fmt.Println("Testing included variable", i, domainOnly+"?"+parameter+"=")
+		domainWithParameter := domainOnly+"?"+parameter+"="
+
+		if checkBodyFor(hash,domainWithParameter+hash) == true{
+			go func () {
+				fmt.Println("[+] Potenial Get Parameter found! ", domainWithParameter)
+				xssScannerQueue <- domainWithParameter
+			}()
+		}
+
 	}
 
 	//Scan with Bruteforce
@@ -285,6 +296,7 @@ func crawlUrlLinks(href string){
 
 	if strings.Contains(href,"?"){
 		foundParameters = paramFinder(href, foundParameters)
+		fmt.Println("Found Parameters: ", foundParameters)
 	}
 
 
@@ -355,7 +367,7 @@ func paramFinder(domain string, foundParameters []string) []string{
 
 			//Regex to replace values from parameters
 			removeValueRegex := regexp.MustCompile("=.*$")
-			strPara := removeValueRegex.ReplaceAllString(param, "${1}")
+			strPara := removeValueRegex.ReplaceAllString(param, "")
 			foundParameters = append(foundParameters, strPara)
 
 		}
