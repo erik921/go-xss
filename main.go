@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"sync"
@@ -197,7 +198,7 @@ func guessParameterBruteforce(bruteforceHref string){
 		fmt.Println("Testing variable", i, s)
 	}
 
-		//Scan with Bruteforce
+	//Scan with Bruteforce
 	scanner := bufio.NewScanner(getParameterFile)
 	for scanner.Scan() {
 		mu.Lock()
@@ -283,7 +284,7 @@ func crawlUrlLinks(href string){
 	crawlerVisited[href] = true
 
 	if strings.Contains(href,"?"){
-		foundParameters = domainsplitter(href, foundParameters)
+		foundParameters = paramFinder(href, foundParameters)
 	}
 
 
@@ -326,12 +327,14 @@ func crawlUrlLinks(href string){
 }
 
 //This function allows to get the parameters from the request
-func domainsplitter(domain string, foundParameters []string) []string{
+func paramFinder(domain string, foundParameters []string) []string{
 	paramstart := strings.Split(domain, "?")[1]
 	params := strings.Split(paramstart, "&")
 	for _, param := range params {
+
 		percentSpl := strings.Split(param, "%")
 
+		//Checking if value needs decoding
 		var strPara string
 		if len(percentSpl) > 1 {
 			for i, j := range percentSpl {
@@ -345,7 +348,12 @@ func domainsplitter(domain string, foundParameters []string) []string{
 				}
 			}
 		} else {
-			strPara = param
+
+			//Regex to replace values from parameters
+			removeValueRegex := regexp.MustCompile("=.*$")
+			strPara := removeValueRegex.ReplaceAllString(param, "${1}")
+			fmt.Println("STR PARAM", strPara)
+
 		}
 		foundParameters = append(foundParameters, strPara)
 	}
