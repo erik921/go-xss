@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/haccer/available"
 	"regexp"
@@ -20,18 +21,29 @@ func getSrcLinks(htmlData []byte, baseurl string){
 	for _, item := range scriptMatchSlice {
 		if !getScriptFound[item[1]]{
 			if strings.Contains(item[1], string("http")) == true{
+
+				if strings.Contains(baseurl,item[1]){
+					fmt.Println("[+] Javascript is being loaded from external domain")
+					checkDomainAvailable(item[1])
+
+				}
+
 				fmt.Println("Script SRC found : ", item[1])
 				ScanSignature(item[1])
 
-				checkDomainAvailable(item[1])
-
 				//Add script to list of found src
 				getScriptFound[item[1]] = true
+
+				//Scanning src for secrets
+				secretScan(item[1])
 
 			}else{
 				logPrint("Script SRC found : ", baseurl+item[1])
 				//Add script to list of found src
 				getScriptFound[baseurl+item[1]] = true
+
+				//Scanning SRC for secrets
+				secretScan(baseurl+item[1])
 
 				if checkDomainAvailable(baseurl+item[1]) == true{
 					fmt.Println("[+] SRC Domain not registed!", baseurl+item[1])
@@ -75,8 +87,36 @@ func checkLinkUrl(htmlData []byte, baseurl string){
 	}
 }
 
+//Function that checks JS files for secrets
+func secretScan(srcUrl string){
+	fmt.Println("Scanning SRC for secrets", srcUrl)
+
+	response, err := customWebclient.Get(srcUrl)
+	checkErr(err)
+	defer response.Body.Close()
+
+	scanner := bufio.NewScanner(response.Body)
+	for scanner.Scan() {
+		if strings.Contains(scanner.Text(), "secret=",) || strings.Contains(scanner.Text(), "secret:") == true {
+			fmt.Println("[+] Possible secret found: ",scanner.Text())
+
+		}
+
+		if strings.Contains(scanner.Text(), "api-key=",) || strings.Contains(scanner.Text(), "api-key:") == true {
+			fmt.Println("Possible API-key: ",scanner.Text())
+
+		}
+
+		if strings.Contains(scanner.Text(), "password=",) || strings.Contains(scanner.Text(), "password:") == true {
+			fmt.Println("Possible password found: ",scanner.Text())
+
+		}
+	}
+
+}
 
 
+//Function to check if a domain is available for registration
 func checkDomainAvailable(domainname string)bool{
 	available := available.Domain(domainname)
 	if available {
@@ -88,6 +128,7 @@ func checkDomainAvailable(domainname string)bool{
 	return false
 }
 
+//Function that will check if the version of Jquery is outdated
 func ScanSignature(url string) () {
 
 	jqueryRegexCheck, _ := regexp.MatchString(`jquery-[0-3].[0-5]`,url)
