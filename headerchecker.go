@@ -42,14 +42,14 @@ func getURLHeaderByKey(url string){
 	if value, ok := headers[xssheader]; ok {
 		fmt.Println(value.(string))
 		}else{
-		fmt.Println("XSS Protection header not found!")
+		fmt.Println("[+] XSS Protection header not found!")
 	}
 
 	//Checks the xframe header
 	if value, ok := headers[xframeheader]; ok {
 		fmt.Println(value.(string))
 	}else{
-		fmt.Println("Iframe protection header not found!")
+		fmt.Println("[+] Iframe protection header not found!")
 
 
 	}
@@ -58,14 +58,14 @@ func getURLHeaderByKey(url string){
 	if value, ok := headers[contentheader]; ok {
 		fmt.Println(value.(string))
 	}else{
-		fmt.Println("Content Type header not found!")
+		fmt.Println("[+] Content Type header not found!")
 	}
 
 	//checks the csp header
 	if value, ok := headers[cspheader]; ok {
 		fmt.Println(value.(string))
 	}else{
-		fmt.Println("CSP Policy header not found!")
+		fmt.Println("[+] CSP Policy header not found!")
 
 	}
 
