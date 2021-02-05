@@ -65,7 +65,7 @@ func main() {
 
 	//Program continues with this if url is set
 	baseurl := *targetUrl
-	fmt.Println("Starting go-xss on domain:", baseurl)
+	fmt.Println("====Starting go-xss on domain:", baseurl, "=====\n")
 
 	//Get headers and analyse them
 	getURLHeaderByKey(baseurl)
@@ -387,6 +387,8 @@ func paramFinder(domain string, foundParameters []string) []string{
 
 func sensitiveFileChecker(url string){
 
+	fmt.Println("======GIT CHECK==========")
+
 	gitLink := url+"/.git/HEAD"
 
 	logPrint("Checking if git is exposed", gitLink)
@@ -401,7 +403,10 @@ func sensitiveFileChecker(url string){
 
 	}
 	logPrint("Git directory not exposed for: ", gitLink)
-	fmt.Println("[+] GIT Directory Server responded with was: ", http.StatusText(response.StatusCode))
+	fmt.Println("GIT Directory Server responded with was: ", http.StatusText(response.StatusCode))
+
+	fmt.Println("======END GIT CHECK==========\n")
+
 }
 
 
