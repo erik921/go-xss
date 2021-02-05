@@ -73,6 +73,9 @@ func main() {
 	//Get Cookies and analyse them
 	getCookies(baseurl)
 
+	//Check if /GIT/ is available on server
+	sensitiveFileChecker(baseurl)
+
 	//Add Base URL to queue
 	go func () {
 		urlCrawlQueue <- baseurl
@@ -380,6 +383,25 @@ func paramFinder(domain string, foundParameters []string) []string{
 
 	}
 	return foundParameters
+}
+
+func sensitiveFileChecker(url string){
+
+	gitLink := url+"/.git/HEAD"
+
+	logPrint("Checking if git is exposed", gitLink)
+
+	response, err := customWebclient.Get(gitLink)
+	checkErr(err)
+	defer response.Body.Close()
+
+	if response.StatusCode >= 200 && response.StatusCode <= 299{
+		fmt.Println("[++] GIT directory might be exposed!", gitLink)
+
+
+	}
+	logPrint("Git directory not exposed for: ", gitLink)
+	fmt.Println("[+] GIT Directory Server responded with was: ", http.StatusText(response.StatusCode))
 }
 
 
