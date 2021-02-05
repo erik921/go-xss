@@ -28,7 +28,13 @@ func getSrcLinks(htmlData []byte, baseurl string){
 
 				}
 
-				fmt.Println("Script SRC found : ", item[1])
+				logPrint("Script SRC found : ", item[1])
+
+				if *showSrc{
+					fmt.Println("Script SRC found : ", item[1])
+
+				}
+
 				ScanSignature(item[1])
 
 				//Add script to list of found src
@@ -89,7 +95,7 @@ func checkLinkUrl(htmlData []byte, baseurl string){
 
 //Function that checks JS files for secrets
 func secretScan(srcUrl string){
-	fmt.Println("Scanning SRC for secrets", srcUrl)
+	logPrint("Scanning SRC for secrets", srcUrl)
 
 	response, err := customWebclient.Get(srcUrl)
 	checkErr(err)
@@ -97,18 +103,25 @@ func secretScan(srcUrl string){
 
 	scanner := bufio.NewScanner(response.Body)
 	for scanner.Scan() {
-		if strings.Contains(scanner.Text(), "secret=",) || strings.Contains(scanner.Text(), "secret:") == true {
-			fmt.Println("[+] Possible secret found: ",scanner.Text())
+		if strings.Contains(scanner.Text(), "secret=",) || strings.Contains(scanner.Text(), "secret:") || strings.Contains(scanner.Text(), "secret") == true {
+			fmt.Println("Possible secret found in: ",srcUrl)
+			logPrint("Possible secret found in string", scanner.Text())
+
+
 
 		}
 
-		if strings.Contains(scanner.Text(), "api-key=",) || strings.Contains(scanner.Text(), "api-key:") == true {
-			fmt.Println("Possible API-key: ",scanner.Text())
+		if strings.Contains(scanner.Text(), "api-key=",) || strings.Contains(scanner.Text(), "api-key:") || strings.Contains(scanner.Text(), "api key:") == true {
+			fmt.Println("Possible API-key found in: ",srcUrl)
+			logPrint("Possible API-key found in string", scanner.Text())
+
+
 
 		}
 
 		if strings.Contains(scanner.Text(), "password=",) || strings.Contains(scanner.Text(), "password:") == true {
-			fmt.Println("Possible password found: ",scanner.Text())
+			fmt.Println("Possible password found in: ",srcUrl)
+			logPrint("Possible password found in string", scanner.Text())
 
 		}
 	}
