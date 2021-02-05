@@ -7,6 +7,9 @@ import (
 
 func getCookies(url string){
 
+	fmt.Println("======Cookie CHECK==========")
+
+
 	//Vraagt de headers op van een url
 	response, err := http.Head(url)
 	if err != nil {
@@ -25,4 +28,7 @@ func getCookies(url string){
 
 		}
 	}
+
+	fmt.Println("======END Cookie CHECK==========\n")
+
 }
