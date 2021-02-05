@@ -35,6 +35,8 @@ var xssScannerQueue = make(chan string)
 var xsshits = make(map[string]bool)
 
 var verboseBool *bool
+var showUrls *bool
+var showSrc *bool
 
 var mu sync.Mutex
 //var hash string
@@ -47,6 +49,10 @@ func main() {
 	targetUrl := flag.String("url", "", "Target URL. (Required)")
 	RecursiveBool := flag.Bool("recursion", false, "Scan urls recursively.")
 	verboseBool = flag.Bool("verbose", false, "Scan urls recursively.")
+	showUrls = flag.Bool("showurls", false, "Shows all the found urls.")
+	showSrc = flag.Bool("showsrc", false, "Shows all the found SRC links.")
+
+
 
 
 	flag.Parse()
@@ -296,6 +302,10 @@ func crawlUrlLinks(href string){
 
 	//Add url to visited map
 	crawlerVisited[href] = true
+
+	if *showUrls == true{
+		fmt.Println("Found URL: ",href)
+	}
 
 	//? means the url has parameters so they need to be processed and checked
 	if strings.Contains(href,"?"){
