@@ -69,6 +69,6 @@ func getURLHeaderByKey(url string){
 
 	}
 
-	fmt.Println("======= END HEADER CHECK======")
+	fmt.Println("======= END HEADER CHECK======\n")
 
 }
