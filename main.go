@@ -37,6 +37,9 @@ var xsshits = make(map[string]bool)
 var verboseBool *bool
 var showUrls *bool
 var showSrc *bool
+var showReflectedGetParameters *bool
+var showPotentialGetParameters *bool
+
 
 var mu sync.Mutex
 //var hash string
@@ -51,6 +54,10 @@ func main() {
 	verboseBool = flag.Bool("verbose", false, "Scan urls recursively.")
 	showUrls = flag.Bool("showurls", false, "Shows all the found urls.")
 	showSrc = flag.Bool("showsrc", false, "Shows all the found SRC links.")
+	showReflectedGetParameters = flag.Bool("showreflected", false, "Show the Reflected GET Parameters.")
+	showPotentialGetParameters = flag.Bool("showpotential", false, "Show the Potential GET Parameters.")
+
+
 
 
 
@@ -137,18 +144,24 @@ func xssAnalysis(xsshref string){
 
 			//Check if payload is being placed inside of a link tag
 			if strings.Contains(scanner.Text(), "a href=") == true{
-				fmt.Println("Payload displayed inside of link tag!")
+				if *showReflectedGetParameters == true {
+					fmt.Println("Payload displayed inside of link tag!", xsshref+hash)
+				}
 			}
 
 			//Check if payload is being placed after = inside of html
 			if strings.Contains(scanner.Text(), "=goxss") == true{
-				fmt.Println("Payload being placed inside of attribute!")
+				if *showReflectedGetParameters == true {
+					fmt.Println("Payload being placed inside of attribute!", xsshref+hash)
+				}
 			}
 
-			fmt.Println("=====================================================================")
-			fmt.Println("Keyword reflected", xsshref)
-			fmt.Println(scanner.Text())
-			fmt.Println("=====================================================================")
+			if *showReflectedGetParameters == true{
+				fmt.Println("=====================================================================")
+				fmt.Println("Keyword reflected", xsshref)
+				fmt.Println(scanner.Text())
+				fmt.Println("=====================================================================")
+			}
 
 		}
 	}
@@ -210,8 +223,13 @@ func guessParameterBruteforce(bruteforceHref string){
 		domainWithParameter := domainOnly+"?"+parameter+"="
 
 		if checkBodyFor(hash,domainWithParameter+hash) == true{
-			go func () {
+
+			if *showPotentialGetParameters == true{
 				fmt.Println("[+] Potenial Get Parameter found! ", domainWithParameter)
+
+			}
+
+			go func () {
 				xssScannerQueue <- domainWithParameter
 			}()
 		}
@@ -237,8 +255,13 @@ func guessParameterBruteforce(bruteforceHref string){
 
 
 		if checkBodyFor(hash,getParameterurl+hash) == true{
-			go func () {
+
+			if *showPotentialGetParameters == true{
 				fmt.Println("[+] Potenial Get Parameter found! ", getParameterurl)
+
+			}
+
+			go func () {
 				xssScannerQueue <- getParameterurl
 			}()
 		}
@@ -387,9 +410,7 @@ func paramFinder(domain string, foundParameters []string) []string{
 
 		}
 
-		fmt.Println("FOUND PARAMETERS ", foundParameters)
 		foundParameters = append(foundParameters)
-		fmt.Println("FOUND PARAMETERS 2", foundParameters)
 
 	}
 	return foundParameters
